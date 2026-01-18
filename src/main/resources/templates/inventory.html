@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление запасами - Система управления запасами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .nav-menu {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-menu a:hover, .nav-menu a.active {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        .alerts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .alert-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .alert-card.warning {
+            border-left: 4px solid #f39c12;
+        }
+        
+        .alert-card.danger {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-count {
+            background: #e74c3c;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .alert-count.warning {
+            background: #f39c12;
+        }
+        
+        .quick-actions {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .action-btn {
+            padding: 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .action-btn.primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .action-btn.success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .action-btn.warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .action-btn.danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .inventory-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .search-bar button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .search-bar button:hover {
+            background: #2980b9;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .low-stock { background-color: #fff3cd; }
+        .out-of-stock { background-color: #f8d7da; }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-success { background: #27ae60; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        
+        .stock-input {
+            width: 80px;
+            padding: 0.25rem;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        @media (max-width: 768px) {
+            .alerts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Управление запасами</h1>
+            <p>Контроль и управление товарными запасами</p>
+        </header>
+
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="/">🏠 Главная</a></li>
+                <li><a href="/analytics">📊 Аналитика</a></li>
+                <li><a href="/reports">📋 Отчеты</a></li>
+                <li><a href="/inventory" class="active">📦 Управление запасами</a></li>
+            </ul>
+        </nav>
+
+        <div class="alerts-section">
+            <div class="alert-card warning">
+                <div class="alert-header">
+                    <h3>⚠️ Низкий запас</h3>
+                    <span class="alert-count warning" th:text="${#lists.size(lowStockProducts)}">0</span>
+                </div>
+                <p>Товары, требующие пополнения запаса</p>
+                <div style="max-height: 200px; overflow-y: auto; margin-top: 1rem;">
+                    <div th:each="product : ${lowStockProducts}" style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        <strong th:text="${product.name}">Товар</strong><br>
+                        <small>Остаток: <span th:text="${product.quantity}">0</span> | Мин: <span th:text="${product.minStock}">5</span></small>
+                    </div>
+                    <div th:if="${#lists.isEmpty(lowStockProducts)}" style="text-align: center; color: #27ae60; padding: 1rem;">
+                        ✅ Все товары имеют достаточный запас
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert-card danger">
+                <div class="alert-header">
+                    <h3>❌ Нет в наличии</h3>
+                    <span class="alert-count" th:text="${#lists.size(outOfStockProducts)}">0</span>
+                </div>
+                <p>Товары, отсутствующие на складе</p>
+                <div style="max-height: 200px; overflow-y: auto; margin-top: 1rem;">
+                    <div th:each="product : ${outOfStockProducts}" style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        <strong th:text="${product.name}">Товар</strong><br>
+                        <small>Категория: <span th:text="${product.category ?: 'Не указана'}">Категория</span></small>
+                    </div>
+                    <div th:if="${#lists.isEmpty(outOfStockProducts)}" style="text-align: center; color: #27ae60; padding: 1rem;">
+                        ✅ Все товары есть в наличии
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h3>🚀 Быстрые действия</h3>
+            <div class="actions-grid">
+                <button class="action-btn success" onclick="showBulkAddModal()">
+                    📦 Массовое пополнение
+                </button>
+                <button class="action-btn warning" onclick="showBulkRemoveModal()">
+                    📤 Массовое списание
+                </button>
+                <button class="action-btn primary" onclick="generateRestockReport()">
+                    📋 Отчет по пополнению
+                </button>
+                <button class="action-btn danger" onclick="markOutOfStock()">
+                    ❌ Отметить как "Нет в наличии"
+                </button>
+            </div>
+        </div>
+
+        <div class="inventory-section">
+            <h3>📋 Управление товарами</h3>
+            
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Поиск товаров...">
+                <button onclick="searchProducts()">🔍 Найти</button>
+                <button onclick="showAllProducts()">📋 Все товары</button>
+                <button onclick="showLowStock()">⚠️ Низкий запас</button>
+                <button onclick="showOutOfStock()">❌ Нет в наличии</button>
+            </div>
+            
+            <div class="table-container">
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Товар</th>
+                            <th>Категория</th>
+                            <th>Текущий запас</th>
+                            <th>Мин. запас</th>
+                            <th>Быстрые действия</th>
+                            <th>Управление</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryBody">
+                        <tr th:each="product : ${allProducts}" 
+                            th:class="${product.lowStock} ? 'low-stock' : (${product.outOfStock} ? 'out-of-stock' : '')">
+                            <td>
+                                <input type="checkbox" class="product-checkbox" th:value="${product.id}">
+                            </td>
+                            <td>
+                                <strong th:text="${product.name}">Товар</strong><br>
+                                <small th:text="${product.supplier ?: 'Поставщик не указан'}">Поставщик</small>
+                            </td>
+                            <td th:text="${product.category ?: 'Не указана'}">Категория</td>
+                            <td>
+                                <span th:text="${product.quantity}" style="font-size: 1.2rem; font-weight: bold;">0</span>
+                                <div style="font-size: 0.8rem; color: #666;">
+                                    Стоимость: <span th:text="${#numbers.formatDecimal(product.totalValue, 0, 2)}">0</span> ₽
+                                </div>
+                            </td>
+                            <td th:text="${product.minStock ?: 5}">5</td>
+                            <td>
+                                <input type="number" class="stock-input" min="1" value="1" th:id="'add-' + ${product.id}">
+                                <button class="btn-small btn-success" th:onclick="'quickAddStock(' + ${product.id} + ')'">➕</button>
+                                <button class="btn-small btn-warning" th:onclick="'quickRemoveStock(' + ${product.id} + ')'">➖</button>
+                            </td>
+                            <td>
+                                <button class="btn-small btn-warning" th:onclick="'editProduct(' + ${product.id} + ')'">✏️</button>
+                                <button class="btn-small btn-danger" th:onclick="'deleteProduct(' + ${product.id} + ')'">🗑️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно массового пополнения -->
+    <div id="bulkAddModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBulkAddModal()">&times;</span>
+            <h2>📦 Массовое пополнение запаса</h2>
+            <p>Добавить количество к выбранным товарам:</p>
+            <input type="number" id="bulkAddQuantity" min="1" value="1" style="width: 100%; padding: 0.75rem; margin: 1rem 0;">
+            <button onclick="executeBulkAdd()" style="width: 100%; padding: 1rem; background: #27ae60; color: white; border: none; border-radius: 5px;">
+                Пополнить запас
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно массового списания -->
+    <div id="bulkRemoveModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBulkRemoveModal()">&times;</span>
+            <h2>📤 Массовое списание</h2>
+            <p>Списать количество с выбранных товаров:</p>
+            <input type="number" id="bulkRemoveQuantity" min="1" value="1" style="width: 100%; padding: 0.75rem; margin: 1rem 0;">
+            <button onclick="executeBulkRemove()" style="width: 100%; padding: 1rem; background: #e74c3c; color: white; border: none; border-radius: 5px;">
+                Списать товары
+            </button>
+        </div>
+    </div>
+
+    <script src="/js/inventory-management.js"></script>
+</body>
+</html>

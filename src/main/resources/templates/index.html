@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система управления запасами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .nav-menu {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-menu a:hover {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+        
+        .add-product, .products-list, .filters {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select, textarea, button {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #229954; }
+        
+        .btn-warning { background: #f39c12; }
+        .btn-warning:hover { background: #e67e22; }
+        
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-in-stock { color: #27ae60; font-weight: bold; }
+        .status-discontinued { color: #e74c3c; font-weight: bold; }
+        .status-out-of-stock { color: #f39c12; font-weight: bold; }
+        
+        .low-stock { background-color: #fff3cd; }
+        .out-of-stock { background-color: #f8d7da; }
+        
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .search-bar input {
+            flex: 1;
+        }
+        
+        .filters h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏪 Система управления запасами</h1>
+            <p>Расширенный прототип для малого предприятия (Java + Spring Boot + Gradle)</p>
+        </header>
+
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="/">🏠 Главная</a></li>
+                <li><a href="/analytics">📊 Аналитика</a></li>
+                <li><a href="/reports">📋 Отчеты</a></li>
+                <li><a href="/inventory">📦 Управление запасами</a></li>
+            </ul>
+        </nav>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${statistics.totalProducts}">0</div>
+                <div class="stat-label">Всего товаров</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${#numbers.formatDecimal(statistics.totalValue, 0, 2)}">0</div>
+                <div class="stat-label">Общая стоимость (₽)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${statistics.lowStockCount}">0</div>
+                <div class="stat-label">Низкий запас</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${statistics.outOfStockCount}">0</div>
+                <div class="stat-label">Нет в наличии</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="add-product">
+                    <h2>➕ Добавить товар</h2>
+                    <form id="productForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="productName">Название *</label>
+                                <input type="text" id="productName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productCategory">Категория</label>
+                                <input type="text" id="productCategory" list="categories">
+                                <datalist id="categories">
+                                    <option th:each="category : ${categories}" th:value="${category}"></option>
+                                </datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="productQuantity">Количество *</label>
+                                <input type="number" id="productQuantity" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productPrice">Цена *</label>
+                                <input type="number" id="productPrice" min="0" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productSupplier">Поставщик</label>
+                                <input type="text" id="productSupplier" list="suppliers">
+                                <datalist id="suppliers">
+                                    <option th:each="supplier : ${suppliers}" th:value="${supplier}"></option>
+                                </datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="productMinStock">Мин. запас</label>
+                                <input type="number" id="productMinStock" min="0" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="productBarcode">Штрихкод</label>
+                                <input type="text" id="productBarcode">
+                            </div>
+                            <div class="form-group">
+                                <label for="productLocation">Местоположение</label>
+                                <input type="text" id="productLocation">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Описание</label>
+                            <textarea id="productDescription"></textarea>
+                        </div>
+                        <button type="submit" class="btn-success">Добавить товар</button>
+                    </form>
+                </div>
+
+                <div class="products-list">
+                    <h2>📋 Список товаров</h2>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Поиск по названию...">
+                        <button onclick="searchProducts()" class="btn-success">🔍 Найти</button>
+                        <button onclick="showAllProducts()">📋 Все товары</button>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button onclick="showLowStock()" class="btn-warning btn-small">⚠️ Низкий запас</button>
+                        <button onclick="showOutOfStock()" class="btn-danger btn-small">❌ Нет в наличии</button>
+                        <button onclick="showTopValue()" class="btn-success btn-small">💰 Топ по стоимости</button>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Название</th>
+                                    <th>Категория</th>
+                                    <th>Количество</th>
+                                    <th>Цена</th>
+                                    <th>Поставщик</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsBody">
+                                <tr th:each="product : ${products}" 
+                                    th:class="${product.lowStock} ? 'low-stock' : (${product.outOfStock} ? 'out-of-stock' : '')">
+                                    <td th:text="${product.id}"></td>
+                                    <td th:text="${product.name}"></td>
+                                    <td th:text="${product.category ?: 'Не указана'}"></td>
+                                    <td th:text="${product.quantity}"></td>
+                                    <td th:text="${#numbers.formatDecimal(product.price, 0, 2)} + ' ₽'"></td>
+                                    <td th:text="${product.supplier ?: 'Не указан'}"></td>
+                                    <td>
+                                        <span th:class="'status-' + ${#strings.toLowerCase(product.status)}" 
+                                              th:text="${product.status}"></span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-small btn-success" 
+                                                th:onclick="'addStock(' + ${product.id} + ')'">➕</button>
+                                        <button class="btn-small btn-warning" 
+                                                th:onclick="'removeStock(' + ${product.id} + ')'">➖</button>
+                                        <button class="btn-small btn-warning" 
+                                                th:onclick="'editProduct(' + ${product.id} + ')'">✏️</button>
+                                        <button class="btn-small btn-danger" 
+                                                th:onclick="'deleteProduct(' + ${product.id} + ')'">🗑️</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="filters">
+                    <h3>🔍 Фильтры</h3>
+                    
+                    <div class="filter-group">
+                        <label>Категория:</label>
+                        <select id="categoryFilter" onchange="filterByCategory()">
+                            <option value="">Все категории</option>
+                            <option th:each="category : ${categories}" th:value="${category}" th:text="${category}"></option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Поставщик:</label>
+                        <select id="supplierFilter" onchange="filterBySupplier()">
+                            <option value="">Все поставщики</option>
+                            <option th:each="supplier : ${suppliers}" th:value="${supplier}" th:text="${supplier}"></option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Статус:</label>
+                        <select id="statusFilter" onchange="filterByStatus()">
+                            <option value="">Все статусы</option>
+                            <option value="IN_STOCK">В наличии</option>
+                            <option value="DISCONTINUED">Снят с производства</option>
+                            <option value="OUT_OF_STOCK">Нет в наличии</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="clearFilters()" class="btn-warning">🔄 Сбросить фильтры</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>✏️ Редактировать товар</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editName">Название *</label>
+                        <input type="text" id="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCategory">Категория</label>
+                        <input type="text" id="editCategory">
+                    </div>
+                    <div class="form-group">
+                        <label for="editQuantity">Количество *</label>
+                        <input type="number" id="editQuantity" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPrice">Цена *</label>
+                        <input type="number" id="editPrice" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSupplier">Поставщик</label>
+                        <input type="text" id="editSupplier">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMinStock">Мин. запас</label>
+                        <input type="number" id="editMinStock" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBarcode">Штрихкод</label>
+                        <input type="text" id="editBarcode">
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocation">Местоположение</label>
+                        <input type="text" id="editLocation">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Описание</label>
+                    <textarea id="editDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Статус</label>
+                    <select id="editStatus">
+                        <option value="IN_STOCK">В наличии</option>
+                        <option value="DISCONTINUED">Снят с производства</option>
+                        <option value="OUT_OF_STOCK">Нет в наличии</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-success">💾 Сохранить</button>
+                <button type="button" onclick="closeEditModal()" class="btn-warning">❌ Отмена</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/inventory.js"></script>
+</body>
+</html>

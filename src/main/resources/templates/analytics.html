@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика - Система управления запасами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #8e44ad, #3498db);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .nav-menu {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-menu a:hover, .nav-menu a.active {
+            background-color: #8e44ad;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #f39c12;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #e74c3c;
+        }
+        
+        .stat-card.success {
+            border-left-color: #27ae60;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .chart-card h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .tables-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .table-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .table-card h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .low-stock { background-color: #fff3cd; }
+        .out-of-stock { background-color: #f8d7da; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.3s ease;
+        }
+        
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-section, .tables-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Аналитика и статистика</h1>
+            <p>Подробная аналитика системы управления запасами</p>
+        </header>
+
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="/">🏠 Главная</a></li>
+                <li><a href="/analytics" class="active">📊 Аналитика</a></li>
+                <li><a href="/reports">📋 Отчеты</a></li>
+                <li><a href="/inventory">📦 Управление запасами</a></li>
+            </ul>
+        </nav>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${statistics.totalProducts}">0</div>
+                <div class="stat-label">Всего товаров</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-number" th:text="${#numbers.formatDecimal(statistics.totalValue, 0, 2)}">0</div>
+                <div class="stat-label">Общая стоимость (₽)</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-number" th:text="${statistics.lowStockCount}">0</div>
+                <div class="stat-label">Товаров с низким запасом</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-number" th:text="${statistics.outOfStockCount}">0</div>
+                <div class="stat-label">Товаров нет в наличии</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${#numbers.formatDecimal(statistics.averagePrice, 0, 2)}">0</div>
+                <div class="stat-label">Средняя цена (₽)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${statistics.totalQuantity}">0</div>
+                <div class="stat-label">Общее количество</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>📈 Распределение по категориям</h3>
+                <div id="categoryChart">
+                    <div th:each="category : ${categories}" class="category-item">
+                        <span th:text="${category}">Категория</span>
+                        <span th:text="${#lists.size(#lists.select(#root.products, product.category == category))} + ' товаров'">0 товаров</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3>💰 Топ товаров по стоимости</h3>
+                <div th:each="product, iterStat : ${topValueProducts}" th:if="${iterStat.index < 5}">
+                    <div class="category-item">
+                        <div>
+                            <strong th:text="${product.name}">Товар</strong><br>
+                            <small th:text="${product.quantity} + ' × ' + ${#numbers.formatDecimal(product.price, 0, 2)} + ' ₽'">Количество × Цена</small>
+                        </div>
+                        <strong th:text="${#numbers.formatDecimal(product.totalValue, 0, 2)} + ' ₽'">Стоимость</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tables-section">
+            <div class="table-card">
+                <h3>⚠️ Товары с низким запасом</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th>Текущий запас</th>
+                                <th>Мин. запас</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${lowStockProducts}" class="low-stock">
+                                <td th:text="${product.name}">Товар</td>
+                                <td th:text="${product.quantity}">0</td>
+                                <td th:text="${product.minStock}">5</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" 
+                                             th:style="'width: ' + ${product.quantity * 100 / product.minStock} + '%'"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(lowStockProducts)}">
+                                <td colspan="4" style="text-align: center; color: #27ae60;">
+                                    ✅ Все товары имеют достаточный запас
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <h3>❌ Товары без запаса</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th>Категория</th>
+                                <th>Поставщик</th>
+                                <th>Цена</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${outOfStockProducts}" class="out-of-stock">
+                                <td th:text="${product.name}">Товар</td>
+                                <td th:text="${product.category ?: 'Не указана'}">Категория</td>
+                                <td th:text="${product.supplier ?: 'Не указан'}">Поставщик</td>
+                                <td th:text="${#numbers.formatDecimal(product.price, 0, 2)} + ' ₽'">Цена</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(outOfStockProducts)}">
+                                <td colspan="4" style="text-align: center; color: #27ae60;">
+                                    ✅ Все товары есть в наличии
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-top: 2rem;">
+            <h3>🔄 Быстрые действия</h3>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button onclick="exportLowStock()" style="padding: 1rem 2rem; background: #f39c12; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    📤 Экспорт товаров с низким запасом
+                </button>
+                <button onclick="exportOutOfStock()" style="padding: 1rem 2rem; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    📤 Экспорт товаров без запаса
+                </button>
+                <button onclick="refreshData()" style="padding: 1rem 2rem; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    🔄 Обновить данные
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function exportLowStock() {
+            window.open('/api/products/low-stock', '_blank');
+        }
+
+        function exportOutOfStock() {
+            window.open('/api/products/out-of-stock', '_blank');
+        }
+
+        function refreshData() {
+            location.reload();
+        }
+
+        // Автообновление каждые 5 минут
+        setInterval(() => {
+            location.reload();
+        }, 300000);
+    </script>
+</body>
+</html>
