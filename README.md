@@ -10,87 +10,99 @@
 - Добавление новых товаров
 - Обновление количества товаров
 - Удаление товаров
-- Простая веб-интерфейс
+- Веб-интерфейс с REST API
+- Аналитика и отчеты
 
 ## Технологии
 
-- **Backend**: Node.js + Express
-- **Frontend**: HTML/CSS/JavaScript
-- **База данных**: SQLite (встроенная)
+- **Backend**: Java 17 + Spring Boot 3.2
+- **Frontend**: Thymeleaf + HTML/CSS/JavaScript
+- **База данных**: H2 Database (встроенная)
+- **Сборка**: Gradle 8.5
 - **Контейнеризация**: Docker
 - **CI/CD**: GitHub Actions
-- **Тестирование**: Jest
-- **Сборка**: npm scripts
+- **Тестирование**: JUnit 5 + Spring Boot Test
 
 ## Архитектура
 
 ```
 inventory-system/
 ├── src/
-│   ├── app.js          # Основное приложение
-│   ├── database.js     # Работа с БД
-│   └── public/         # Статические файлы
-├── tests/              # Модульные тесты
-├── Dockerfile          # Docker образ
-├── docker-compose.yml  # Локальный запуск
-├── package.json        # Зависимости
-└── .github/workflows/  # CI/CD
+│   ├── main/
+│   │   ├── java/com/inventory/
+│   │   │   ├── InventoryApplication.java    # Главный класс
+│   │   │   ├── model/Product.java           # Модель товара
+│   │   │   ├── repository/ProductRepository.java # JPA репозиторий
+│   │   │   ├── service/ProductService.java  # Бизнес-логика
+│   │   │   └── controller/                  # REST и Web контроллеры
+│   │   └── resources/
+│   │       ├── application.properties       # Конфигурация
+│   │       ├── data.sql                     # Тестовые данные
+│   │       └── templates/                   # Thymeleaf шаблоны
+│   └── test/                               # Модульные тесты
+├── build.gradle                            # Конфигурация Gradle
+├── Dockerfile                              # Docker образ
+└── gradlew.bat                            # Gradle Wrapper
 ```
 
 ## Быстрый запуск
 
 ### Вариант 1: Автоматический запуск (рекомендуется)
 
-**Windows (cmd/PowerShell):**
+**Самый простой способ:**
 ```cmd
-# Просто дважды кликните на файл start.bat
-# ИЛИ запустите в командной строке:
-start.bat
+# Просто дважды кликните на файл:
+ЗАПУСК.bat
 ```
 
-**PowerShell:**
-```powershell
-# Разрешите выполнение скриптов (если нужно):
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+**Альтернативы:**
+```cmd
+# Или используйте:
+start.bat
 
-# Запустите скрипт:
+# Или в PowerShell:
 .\start.ps1
 ```
 
-**Если Node.js уже установлен:**
-```cmd
-npm run start:auto
-```
+**Что происходит автоматически:**
+- ✅ Поиск или установка Java 17+
+- ✅ Настройка Gradle Wrapper
+- ✅ Сборка проекта
+- ✅ Настройка базы данных H2
+- ✅ Запуск Spring Boot приложения
+- ✅ Автоматическое открытие браузера
 
 ### Вариант 2: Docker
 
 ```bash
-# Запуск через Docker Compose
-docker-compose up --build
+# Запуск через Docker
+docker build -t inventory-system .
+docker run -p 8080:8080 inventory-system
 ```
 
 ### Вариант 3: Ручная установка
 
 ```bash
-# Установка зависимостей
-npm install
+# Если Java и Gradle уже установлены
+./gradlew bootRun
 
-# Запуск приложения
-npm start
+# Или через JAR файл
+./gradlew build
+java -jar build/libs/inventory-system.jar
 ```
 
 ## Использование
 
-После запуска откройте браузер и перейдите по адресу: http://localhost:3000
+После запуска откройте браузер и перейдите по адресу: http://localhost:8080
 
 ## Тестирование
 
 ```bash
 # Запуск тестов
-npm test
+./gradlew test
 
-# Запуск тестов с покрытием
-npm run test:coverage
+# Запуск тестов с отчетом
+./gradlew test jacocoTestReport
 ```
 
 ## Мониторинг
@@ -104,36 +116,39 @@ npm run test:coverage
 
 ```sql
 CREATE TABLE products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 0,
-    price REAL NOT NULL DEFAULT 0.0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    price DOUBLE NOT NULL DEFAULT 0.0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 ## API Endpoints
 
 - `GET /api/products` - Получить все товары
+- `GET /api/products/{id}` - Получить товар по ID
 - `POST /api/products` - Добавить товар
-- `PUT /api/products/:id` - Обновить товар
-- `DELETE /api/products/:id` - Удалить товар
+- `PUT /api/products/{id}` - Обновить товар
+- `DELETE /api/products/{id}` - Удалить товар
+- `GET /api/products/search?name={name}` - Поиск товаров
+- `GET /api/products/low-stock?threshold={number}` - Товары с низким запасом
 
 ## Разработка
 
 Проект настроен для разработки с автоматической перезагрузкой:
 
 ```bash
-npm run dev
+./gradlew bootRun --continuous
 ```
 
 ## CI/CD
 
 Настроен GitHub Actions pipeline для:
-- Автоматической сборки
-- Запуска тестов
+- Автоматической сборки с Gradle
+- Запуска тестов JUnit
 - Создания Docker образа
-- Деплоя (при необходимости)
+- Проверки качества кода
 
 ## Автор
 
