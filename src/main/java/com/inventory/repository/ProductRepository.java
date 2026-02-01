@@ -26,7 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     /**
      * Поиск товаров в диапазоне цен
      */
-    List<Product> findByPriceBetween(Double minPrice, Double maxPrice);
+    List<Product> findByPriceBetween(Integer minPrice, Integer maxPrice);
     
     /**
      * Поиск товаров по категории

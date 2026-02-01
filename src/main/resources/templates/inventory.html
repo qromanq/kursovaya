@@ -403,7 +403,7 @@
                             <td>
                                 <span th:text="${product.quantity}" style="font-size: 1.2rem; font-weight: bold;">0</span>
                                 <div style="font-size: 0.8rem; color: #666;">
-                                    Стоимость: <span th:text="${#numbers.formatDecimal(product.totalValue, 0, 2)}">0</span> ₽
+                                    Стоимость: <span th:text="${#numbers.formatDecimal(product.totalValue, 0, 0)}">0</span> ₽
                                 </div>
                             </td>
                             <td th:text="${product.minStock ?: 5}">5</td>

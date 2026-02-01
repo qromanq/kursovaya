@@ -223,7 +223,7 @@
                 <div class="stat-label">Всего товаров</div>
             </div>
             <div class="stat-card success">
-                <div class="stat-number" th:text="${#numbers.formatDecimal(statistics.totalValue, 0, 2)}">0</div>
+                <div class="stat-number" th:text="${statistics.totalValue}">0</div>
                 <div class="stat-label">Общая стоимость (₽)</div>
             </div>
             <div class="stat-card warning">
@@ -235,7 +235,7 @@
                 <div class="stat-label">Товаров нет в наличии</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" th:text="${#numbers.formatDecimal(statistics.averagePrice, 0, 2)}">0</div>
+                <div class="stat-number" th:text="${statistics.averagePrice}">0</div>
                 <div class="stat-label">Средняя цена (₽)</div>
             </div>
             <div class="stat-card">
@@ -250,7 +250,7 @@
                 <div id="categoryChart">
                     <div th:each="category : ${categories}" class="category-item">
                         <span th:text="${category}">Категория</span>
-                        <span th:text="${#lists.size(#lists.select(#root.products, product.category == category))} + ' товаров'">0 товаров</span>
+                        <span>товары по категориям</span>
                     </div>
                 </div>
             </div>
@@ -261,9 +261,9 @@
                     <div class="category-item">
                         <div>
                             <strong th:text="${product.name}">Товар</strong><br>
-                            <small th:text="${product.quantity} + ' × ' + ${#numbers.formatDecimal(product.price, 0, 2)} + ' ₽'">Количество × Цена</small>
+                            <small th:text="${product.quantity} + ' × ' + ${product.price} + ' ₽'">Количество × Цена</small>
                         </div>
-                        <strong th:text="${#numbers.formatDecimal(product.totalValue, 0, 2)} + ' ₽'">Стоимость</strong>
+                        <strong th:text="${product.totalValue} + ' ₽'">Стоимость</strong>
                     </div>
                 </div>
             </div>
@@ -321,7 +321,7 @@
                                 <td th:text="${product.name}">Товар</td>
                                 <td th:text="${product.category ?: 'Не указана'}">Категория</td>
                                 <td th:text="${product.supplier ?: 'Не указан'}">Поставщик</td>
-                                <td th:text="${#numbers.formatDecimal(product.price, 0, 2)} + ' ₽'">Цена</td>
+                                <td th:text="${product.price} + ' ₽'">Цена</td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(outOfStockProducts)}">
                                 <td colspan="4" style="text-align: center; color: #27ae60;">

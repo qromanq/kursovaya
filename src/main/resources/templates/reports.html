@@ -305,11 +305,11 @@
                     <div class="summary-label">Общее количество</div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-number" th:text="${#numbers.formatDecimal(#aggregates.sum(products.![totalValue]), 0, 2)}">0</div>
+                    <div class="summary-number" th:text="${#numbers.formatDecimal(#aggregates.sum(products.![totalValue]), 0, 0)}">0</div>
                     <div class="summary-label">Общая стоимость (₽)</div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-number" th:text="${#numbers.formatDecimal(#aggregates.avg(products.![price]), 0, 2)}">0</div>
+                    <div class="summary-number" th:text="${#numbers.formatDecimal(#aggregates.avg(products.![price]), 0, 0)}">0</div>
                     <div class="summary-label">Средняя цена (₽)</div>
                 </div>
             </div>
@@ -350,8 +350,8 @@
                             <td th:text="${product.category ?: 'Не указана'}"></td>
                             <td th:text="${product.supplier ?: 'Не указан'}"></td>
                             <td th:text="${product.quantity}"></td>
-                            <td th:text="${#numbers.formatDecimal(product.price, 0, 2)}"></td>
-                            <td th:text="${#numbers.formatDecimal(product.totalValue, 0, 2)}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.price, 0, 0)}"></td>
+                            <td th:text="${#numbers.formatDecimal(product.totalValue, 0, 0)}"></td>
                             <td th:text="${product.minStock ?: 5}"></td>
                             <td>
                                 <span th:if="${product.outOfStock}" style="color: #e74c3c; font-weight: bold;">❌ Нет в наличии</span>

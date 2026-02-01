@@ -362,7 +362,7 @@ function updateInventoryTable(products) {
             <td>
                 <span style="font-size: 1.2rem; font-weight: bold;">${product.quantity}</span>
                 <div style="font-size: 0.8rem; color: #666;">
-                    Стоимость: ${(product.quantity * product.price).toFixed(2)} ₽
+                    Стоимость: ${(product.quantity * product.price).toFixed(0)} ₽
                 </div>
             </td>
             <td>${product.minStock || 5}</td>

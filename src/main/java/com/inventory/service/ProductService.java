@@ -175,12 +175,12 @@ public class ProductService {
         stats.put("lowStockCount", getLowStockProducts().size());
         stats.put("outOfStockCount", getOutOfStockProducts().size());
         stats.put("totalValue", allProducts.stream()
-                .mapToDouble(Product::getTotalValue)
+                .mapToInt(Product::getTotalValue)
                 .sum());
-        stats.put("averagePrice", allProducts.stream()
-                .mapToDouble(Product::getPrice)
+        stats.put("averagePrice", (int) allProducts.stream()
+                .mapToInt(Product::getPrice)
                 .average()
-                .orElse(0.0));
+                .orElse(0));
         stats.put("totalQuantity", allProducts.stream()
                 .mapToInt(Product::getQuantity)
                 .sum());

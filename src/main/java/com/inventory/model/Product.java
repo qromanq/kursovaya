@@ -21,7 +21,7 @@ public class Product {
     private Integer quantity = 0;
     
     @Column(nullable = false)
-    private Double price = 0.0;
+    private Integer price = 0;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -51,13 +51,25 @@ public class Product {
     private ProductStatus status = ProductStatus.IN_STOCK;
     
     public enum ProductStatus {
-        IN_STOCK, DISCONTINUED, OUT_OF_STOCK
+        IN_STOCK("В наличии"), 
+        DISCONTINUED("Снят с производства"), 
+        OUT_OF_STOCK("Нет в наличии");
+        
+        private final String displayName;
+        
+        ProductStatus(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        public String getDisplayName() {
+            return displayName;
+        }
     }
     
     // Конструкторы
     public Product() {}
     
-    public Product(String name, Integer quantity, Double price) {
+    public Product(String name, Integer quantity, Integer price) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
@@ -75,8 +87,8 @@ public class Product {
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
     
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -105,6 +117,10 @@ public class Product {
     public ProductStatus getStatus() { return status; }
     public void setStatus(ProductStatus status) { this.status = status; }
     
+    public String getStatusDisplayName() {
+        return status != null ? status.getDisplayName() : "Неизвестно";
+    }
+    
     // Вспомогательные методы
     public boolean isLowStock() {
         return quantity != null && minStock != null && quantity < minStock;
@@ -114,8 +130,8 @@ public class Product {
         return quantity == null || quantity <= 0;
     }
     
-    public Double getTotalValue() {
-        return (quantity != null && price != null) ? quantity * price : 0.0;
+    public Integer getTotalValue() {
+        return (quantity != null && price != null) ? quantity * price : 0;
     }
     
     @PreUpdate

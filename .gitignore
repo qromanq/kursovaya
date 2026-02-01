@@ -54,3 +54,11 @@ build/
 
 # Data directory
 data/
+
+# Documentation and AI files
+*.md
+word/
+.kiro/
+
+# Gradle cache
+.gradle/
